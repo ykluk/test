@@ -1,0 +1,458 @@
+	<div 
+		class="shadowTop">
+		</div>
+	<div route-directive (routeChange)="onRouteChange($event)"></div>
+
+	<div class="left">
+		<div class="top">
+			<mainMenuBtn color1="#8063A5" color2="#55397B" color3="#3E2461" 
+			></mainMenuBtn>
+			<mainMenu #mainMenu color1="#8063A5" color2="#55397B" color3="#3E2461"></mainMenu>
+			<span class="title">{{"schoolSetting.title"|translate}}</span>
+		</div>
+		<div class="bottom">
+			<sideList
+				[options]="categories"
+				[(ngModel)]="selectedCategory"
+				(ngModelChange)="controller.switchCategory(selectedCategory.value)"
+			></sideList>
+		</div>
+	</div>
+	<div class="mainArea">
+		<navBar [shadowTop]="false" height="70px" backgroundColor="transparent">
+			<topRightToolBar right [showUserMenu]="false" [iconBtns]="iconBtnsConfig"></topRightToolBar>
+		</navBar>
+		
+		<div class="listArea">
+				<school-setting-view *ngIf="context && controller.getSelectedCategory()=='schoolSetting'" [context]="context" [currentSection]="controller.getSelectedCategory()"></school-setting-view>
+				<school-setting-view *ngIf="context && controller.getSelectedCategory()=='permission'" [context]="context"  [currentSection]="controller.getSelectedCategory()"></school-setting-view>
+				<school-setting-view *ngIf="context && controller.getSelectedCategory()=='orderInfo'" [context]="context"  [currentSection]="controller.getSelectedCategory()"></school-setting-view>
+
+				<school-setting-view *ngIf="context && controller.getSelectedCategory()=='basicInfo'" [context]="context"  [currentSection]="controller.getSelectedCategory()"></school-setting-view>
+				<school-setting-view *ngIf="context && controller.getSelectedCategory()=='shop'" [context]="context"  [currentSection]="controller.getSelectedCategory()"></school-setting-view>
+				
+				<!-- <div *ngIf="controller.getSelectedCategory()=='basicInfo'" class="school-setting-basic-info"></div> -->
+				<div *ngIf="context && controller.getSelectedCategory()=='schoolSubject'" class="school-subject-section">
+					<div class="filterArea2">
+						<div class="simple_selector">
+							<span class="label" style="display:block"
+							>{{"LANG_SCHOOL_SETTING_SUBJECT_TYPE"|lang}}:</span>
+							<ng-select
+								
+								class="selector custom2 white"
+								[items]="translatedSelection.type"
+								bindLabel="title"
+								bindValue="value"
+								[closeOnSelect]="true"
+								[clearable]="false"
+								[searchable]="false"
+								appendTo="body"
+								[(ngModel)]="model.school_subject_type"
+								(change)="controller.changeSubjectType($event.value)"
+								>
+							</ng-select>
+						</div>
+						<div class="simple_selector">
+							<span class="label" style="display:block">{{"LANG_SCHOOL_SETTING_SUBJECT_LEVEL"|lang}}:</span>
+							<ng-select 
+								class="selector custom2 white"
+								[items]="translatedSelection.level"
+								bindLabel="title"
+								bindValue="value"
+								[closeOnSelect]="true"
+								[clearable]="false"
+								[searchable]="false"
+								appendTo="body"
+								[(ngModel)]="model.school_subject_level"
+								(change)="controller.changeLevelFilter($event.value)"
+								>
+							</ng-select>
+						</div>
+
+						<div class="reload-btn button" (click)="reload();"></div>
+					</div>
+					<div style="height:46px;">
+						<table class="table table-striped" *ngIf="controller.loading == false && displayItemList && displayItemList.length">
+							<thead >
+								<tr>
+									<th style="width:20px;min-width:20px;"></th>
+									<!-- 排序，程度，簡稱，名稱 (中文) / 名稱 (英文)，編號，不出類別，時間，評分，關鍵字 -->
+									<!--排序  --><th class="w2" style="min-width:50px"><div class="overflow-container"><span>{{"LANG_SCHOOL_SETTING_ORDER"|lang}}</span></div></th>
+									<!--程度  --><th class="w15"><div class="overflow-container"><span>{{"LANG_SCHOOL_SETTING_SUBJECT_LEVEL"|lang}}</span></div></th>
+									<!--簡稱  --><th class="w10"><div class="overflow-container  short_name_color"><span>{{"LANG_SCHOOL_SETTING_SUBJECT_SHORT_NAME"|lang}}</span></div></th>
+
+									<!-- <th class="name-field">{{"LANG_SCHOOL_SETTING_SUBJECT_NAME"|lang}}</th> -->
+									<!-- 名稱 (中文) / 名稱 (英文) -->
+												<th>
+													<div class="bold overflow-container title_color"><span>{{"LANG_SCHOOL_SETTING_SUBJECT_CHI_NAME"|lang}} / {{"LANG_SCHOOL_SETTING_SUBJECT_ENG_NAME"|lang}}</span></div>
+												</th>
+									<!--編號  --><th class="w5">
+													<div class="overflow-container"><span>{{"LANG_SCHOOL_SETTING_SUBJECT_CODE"|lang}}</span></div>
+												</th>
+									<!--不出類別 -->
+									<!--時間	 --><th class="time-range w10" style="text-align:left"><div class="overflow-container"><span>{{"LANG_SCHOOL_SETTING_SUBJECT_TIME_RANGE"|lang}}</span></div></th>
+									<!--評分     --><th class="w5"><div class="overflow-container"><span>{{"LANG_SCHOOL_SETTING_SUBJECT_GRADING_SCALE"|lang}}</span></div></th>
+									<!--關鍵字 --><th class="w10"><div class="overflow-container"><span>{{"LANG_SCHOOL_SETTING_SUBJECT_TAG"|lang}}</span></div></th>
+									<th style="width:98px"></th>
+									
+								</tr>
+							</thead>
+						</table>
+						
+						<div style="height:calc(100vh - 150px);">
+							<perfect-scrollbar 
+								[ngClass]="(datas.dev.isMobile?'mobile':'')" 
+								[disabled]="datas.dev.isMobile"
+								>
+								
+								<div class="subjectListView">
+									<div>
+										<div *ngIf="controller.loading == false && displayItemList ">
+				
+											<div *ngIf="displayItemList.length == 0" class="list__remain ng-star-inserted">
+												<div class="no-result">
+													<div class="icon"></div>
+													<div class="list__remain__text">
+														{{"LANG_NO_DATA"|lang}}
+													</div>
+												</div>
+											</div>
+											<div *ngIf="displayItemList.length > 0">
+										
+												<table class="data-table table table-striped">
+													<tbody class="no-select">
+														<ng-container *ngFor="let item of displayItemList">
+															<tr class="listViewLine">
+																
+																<td style="width:20px;min-width:20px;"></td>
+																<!-- 排序，程度，簡稱，名稱 (中文) / 名稱 (英文)，編號，不出類別，時間，評分，關鍵字 -->
+																<!--排序  --><td class="w2" style="min-width:50px"><div class="overflow-container"><span>{{item.sorting_order}}</span></div></td>
+																<!--程度  --><td class="w15"><div class="overflow-container"><span>{{(item.level ? "schoolSetting.label.subject_level_type." + item.level : "" )|translate}}</span></div>
+																	</td>
+																<!--簡稱  --><td class="w10" ><div class="overflow-container short_name_color"><span>{{item.short_name}}</span></div></td>
+				
+																<!-- <th class="name-field">{{"LANG_SCHOOL_SETTING_SUBJECT_NAME"|lang}}</th> -->
+																<!-- 名稱 (中文) / 名稱 (英文) -->
+																	<td class="bold title_color">
+																		<div class="overflow-container"><span>{{ datas.lang == 'en' ? item.ename : item.cname}}</span></div>
+																	</td>
+																<!--編號  --><td class="w5"><div class="overflow-container"><span>{{item.code}}</span></div></td>
+																<!--不出類別 -->
+																<!--時間	 --><td class="time-range w10" style="text-align:left;font-size:12px">
+																					<span *ngIf="item.start_time && item.end_time">
+																						{{item.start_time|date_format}} - <BR>{{item.end_time|date_format}}
+																					</span>
+																					<span *ngIf="item.start_time && !item.end_time">
+																						{{item.start_time|date_format}} - &infin;
+																					</span>
+																				</td>
+																<!--評分     --><td class="w5"><div class="overflow-container"><span>{{item.grading_scale|gradingscale}}</span></div></td>
+																<!--關鍵字 --><td class="w10"><div class="overflow-container"><span>{{item.tag}}</span></div></td>
+																
+																<!-- 
+																<td class="name-field">{{item.name}}</td>
+																<td>{{
+																	
+																	(item.type ? "schoolSetting.label.subject_type.type_" + item.type : "") | translate
+																}}</td>
+																-->
+																<td style="width:46px"><div class="button btn-edit-subject" (click)="editSubject(item)"></div></td>
+																<td style="width:46px"><div [class.selected]="item.selected" class="button subject-checkbox" (click)="toggleSelection(item)"></div></td>
+															</tr>
+														</ng-container>
+													</tbody>
+												</table>
+											</div>
+										</div>
+									</div>
+								</div>
+							</perfect-scrollbar>
+						</div>
+					</div>
+				</div>
+			
+			
+			<div 
+				*ngIf="context && model.school_subject_type == 'school'" class="btn-add" 
+				(click)="addSchoolSubject()"
+				>
+			</div>
+		</div>
+		
+		<selectionPanel [config]="selectionPanelConfig" [selectedItems]="getSelectedItems()"></selectionPanel>
+	</div>
+
+	<modal 
+		#editModal 
+		title="{{
+			(_modalBinder.getValue('dialog_type') == 'new' ? 
+			'schoolSetting.label.subject_add_title' : 
+			'schoolSetting.label.subject_edit_title') |translate
+		}}" 
+		width="589px" 
+		[lang]="datas.lang"
+		backgroundColor="#E9E4EC" 
+		cfmBtnBgColor="#41304B"
+		(cancelClick)="editModal.close()" 
+		>
+		<div class="inputItemList" >
+			
+			<div *ngIf="!(_modalBinder.model)">
+				Model Not defined
+			</div>
+			<div *ngIf="_modalBinder.model">
+				<!-- 
+				<div class="inputItem">
+					<div class="label edit-col1 left">{{"LANG_SCHOOL_SETTING_SUBJECT_NAME"|lang}}</div>
+					<div class="right edit-col2">
+						<input 
+							[ngModel]="_modalBinder.model.name"
+							(ngModelChange)="_modalBinder.onModelChange('name', $event)"
+							maxlength="250"
+							[disabled]="_modalBinder.model.type == 'public'"
+							>
+					</div>
+				</div>
+				-->
+				<div class="inputItem">
+					<div class="label edit-col1 left">{{"LANG_SCHOOL_SETTING_SUBJECT_CHI_NAME"|lang}}</div>
+					<div  class="right edit-col2">
+						<input 
+						[ngModel]="_modalBinder.model.cname"
+						(ngModelChange)="_modalBinder.onModelChange('cname', $event)"
+						maxlength="250" 
+						[disabled]="_modalBinder.model.type == 'public'"
+						class="modal_input"
+						>
+					</div>
+					
+				</div>
+				<div class="inputItem">
+					<div class="label edit-col1 left">{{"LANG_SCHOOL_SETTING_SUBJECT_ENG_NAME"|lang}}</div>
+					<div  class="right edit-col2">
+						<input 
+						[ngModel]="_modalBinder.model.ename"
+						(ngModelChange)="_modalBinder.onModelChange('ename', $event)"
+						maxlength="250"
+						[disabled]="_modalBinder.model.type == 'public'"
+						class="modal_input"
+						>
+					</div>
+					
+				</div>
+
+				
+				<div class="inputItem">
+					<div class="label edit-col1 left">{{"LANG_SCHOOL_SETTING_SUBJECT_SHORT_NAME"|lang}}:</div>
+					<div  class="right edit-col2">
+						<input 
+						[ngModel]="_modalBinder.model.short_name"
+						(ngModelChange)="_modalBinder.onModelChange('short_name', $event)"
+						maxlength="250" required
+						class="modal_input"
+						
+						>
+					</div>
+				</div>
+				<div class="inputItem">
+					<div class="label edit-col1 left">{{"LANG_SCHOOL_SETTING_SUBJECT_CODE"|lang}}:</div>
+					<div  class="right edit-col2">
+						<input 
+						placeholder="{{'schoolSetting.label.subject_code.placeholder'|translate}}"
+						[ngModel]="_modalBinder.model.code"
+						(ngModelChange)="_modalBinder.onModelChange('code', $event)"
+						maxlength="250"
+						[disabled]="_modalBinder.model.type == 'public'"
+						class="modal_input"
+						>
+					</div>
+					
+				</div>
+				<!-- 
+				<div class="inputItem">
+					<div class="label edit-col1 left">{{"schoolSetting.label.subject_type.title"|translate}}:</div>
+					<div  class="right edit-col2">
+						<input 
+							value="{{'schoolSetting.label.subject_type.type_' + _modalBinder.model.type|translate}}" 
+							readonly>
+					</div>
+					
+				</div>
+				-->
+				<div class="inputItem">
+					<div class="label edit-col1 left">{{"LANG_SCHOOL_SETTING_SUBJECT_LEVEL"|lang}}:</div>
+					<div  class="right edit-col2">
+						<ng-select
+							class="selector custom2"
+							[items]="translatedSelection.level"
+							bindLabel="title"
+							bindValue="value"
+							[closeOnSelect]="true"
+							[clearable]="false"
+							[searchable]="false"
+							appendTo="body"
+							[(ngModel)]="_modalBinder.model.level"
+							[disabled]="_modalBinder.model.type == 'public'"
+
+							>
+						</ng-select>
+					</div>
+				</div>
+				
+				<div class="inputItem">
+					<div class="label edit-col1 left ">{{"LANG_SCHOOL_SETTING_SUBJECT_TIME_RANGE"|lang}}:</div>
+					<div 
+						class="right edit-col2">
+						<div
+							style="padding-left: 10px;padding-right: 10px;display: inline-block;"
+							#target (click)="onClick(_modalBinder.model, target)" 
+							>
+							<span *ngIf="_modalBinder.model.start_time && _modalBinder.model.end_time">
+								{{_modalBinder.model.start_time|date_format}} - {{_modalBinder.model.end_time|date_format}}
+							</span>
+							<span *ngIf="_modalBinder.model.start_time && !_modalBinder.model.end_time">
+								{{_modalBinder.model.start_time|date_format}} - &infin;
+							</span>
+							<span *ngIf="!_modalBinder.model.start_time" class="underline">
+								{{'LANG_DATA_NOT_SET'|lang}}
+							</span>
+						</div>
+					</div>
+				</div>
+
+				<!--
+					<div class="inputItem">
+						<div class="label edit-col1 left">{{"schoolSetting.label.subject_time_range"|translate}}:</div>
+						<input 
+							[ngModel]="_modalBinder.model.subject_time_range"
+							(ngModelChange)="_modalBinder.onModelChange('subject_time_range', $event)"
+							maxlength="250">
+					</div>
+				-->
+				<div class="inputItem">
+					<div class="label edit-col1 left">{{"LANG_SCHOOL_SETTING_SUBJECT_GRADING_SCALE"|lang}}:</div>
+					<div  class="right edit-col2">
+						<ng-select
+							class="selector custom2"
+							[items]="translatedSelection.grading"
+							bindLabel="title"
+							bindValue="value"
+							[closeOnSelect]="true"
+							[clearable]="false"
+							[searchable]="false"
+							appendTo="body"
+							[(ngModel)]="_modalBinder.model.grading_scale"
+							></ng-select>
+					</div>
+					
+					
+				</div>
+
+				
+				<div class="inputItem">
+					<div class="label edit-col1 left">{{"LANG_SCHOOL_SETTING_SUBJECT_SORTING_ORDER"|lang}}</div>
+					<div  class="right edit-col2">
+						<input 
+							[ngModel]="_modalBinder.model.sorting_order"
+							(ngModelChange)="_modalBinder.onModelChange('sorting_order', $event)"
+							maxlength="250"
+							class="modal_input"
+							>
+					</div>
+					
+				</div>
+
+
+				<div class="inputItem">
+					<div class="label edit-col1 left">{{"LANG_SCHOOL_SETTING_SUBJECT_TAG"|lang}}:</div>
+					<div  class="right edit-col2">
+						<input 
+							[ngModel]="_modalBinder.model.tag"
+							(ngModelChange)="_modalBinder.onModelChange('tag', $event)"
+							maxlength="250"
+							class="modal_input"
+							>
+					</div>
+					
+				</div>
+				<div
+					class="inputItem"
+					*ngIf="_modalBinder.model.id"
+					>
+					<div class="label edit-col1 left">{{"LANG_SCHOOL_SETTING_SUBJECT_STATUS"|lang}}:</div>
+					<div  class="right edit-col2">
+						<ng-select
+							class="selector custom2"
+							[items]="translatedSelection.status"
+							bindLabel="title"
+							bindValue="value"
+							[closeOnSelect]="true"
+							[clearable]="false"
+							[searchable]="false"
+							appendTo="body"
+							[(ngModel)]="_modalBinder.model.status"
+							></ng-select>
+					</div>
+					
+				</div>
+			</div>
+		</div>
+
+	</modal>
+
+	<toolTip #filterToolTip position="top">
+		<div class="filterContainer">
+
+			<div class="filter">
+				<div class="filterTitle">{{"commonService.status"|translate}} :</div>
+				<div class="filterOptions">
+					<div class="filterOptionItem" *ngFor="let status of activeStatus"
+						(click)="controller.setStatus(status);clearSelectedItem();controller.fetch();">
+						<img class="filterOptionItemIcon" *ngIf="controller.getStatus()==status" src="./assets/img/sel40_red.svg">
+						<img class="filterOptionItemIcon" *ngIf="controller.getStatus()!=status"
+							src="./assets/img/sel40_gray1.svg">
+						<div class="filterOptionItemTitle">{{status.titleKey|translate}}</div>
+					</div>
+				</div>
+			</div>
+			
+			<!--
+				
+			<date-range-picker [filterData]="dateRangeFilter"></date-range-picker>
+			
+			<date-range-picker [filterData]="filterData" (changed)="filterChange($event, 'period')"></date-range-picker>
+			
+			<div class="filter">
+				<div class="filterTitle">{{"commonService.school_year.year"|translate}} :</div>
+				<div class="filterOptions">
+					<div class="filterOptionItem" *ngFor="let year of schoolYearList"
+						(click)="controller.setSchoolYear(year); selectedYear=year; clearSelectedItem(); controller.fetch();">
+						<img class="filterOptionItemIcon" *ngIf="year.id==selectedYear.id" src="./assets/img/sel40_red.svg">
+						<img class="filterOptionItemIcon" *ngIf="year.id!=selectedYear.id"
+							src="./assets/img/sel40_gray1.svg">
+						<div class="filterOptionItemTitle">{{year.title}}</div>
+					</div>
+				</div>
+			</div>
+			-->
+		</div>
+	</toolTip>
+
+	<dateTimePicker 
+		#dateTimePicker 
+		clearBtn="{{true}}" 
+		lang="tc"
+		color1="#41304B"
+		color2="#E9E4EC"
+		>
+	</dateTimePicker>
+
+		
+	<div class="versionNum topLeft" >
+		{{coms.getVersionString('schoolSettingModule')}}</div>
+
+	<div class="fake-for-user-menu"></div>
+
+	<user-menu *ngIf="sts && sts.otherObjs && sts.otherObjs['user']" [data]="sts.otherObjs['user']"
+	[style]="{top:'15px', right:'22px'}" [showName]="false"></user-menu>
+
